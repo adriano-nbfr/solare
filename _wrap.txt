@@ -1,0 +1,5 @@
+c:\Users\usuario\dsmpf-demo-full-spring\mvnw
+c:\Users\usuario\dsmpf-demo-full-spring\mvnw.cmd
+c:\Users\usuario\dsmpf-demo-full-spring\.mvn\wrapper
+c:\Users\usuario\dsmpf-demo-full-spring\.mvn\wrapper\maven-wrapper.jar
+c:\Users\usuario\dsmpf-demo-full-spring\.mvn\wrapper\maven-wrapper.properties

@@ -1,0 +1,461 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Solare - MVP Hackathon AWS x MPF.
+  Infra: DynamoDB single-table (PK/SK + GSI1/GSI2/GSI3 + TTL), API Gateway HTTP
+  API + Lambda de health check, barramento EventBridge de eventos de reserva e
+  Lambda de notificacao (consome o evento e envia e-mail HTML via SES - F8).
+  Regiao alvo: us-east-1. Deploy: sam build && sam deploy --profile hackaton --region us-east-1.
+
+Parameters:
+  Ambiente:
+    Type: String
+    Default: desenv
+    AllowedValues:
+      - desenv
+      - homolog
+      - prod
+    Description: Ambiente de implantacao. Fora de prod o stub de identidade fica habilitado.
+  EmailRemetente:
+    Type: String
+    Default: nao-responder@solare.mpf.mp.br
+    Description: >
+      Remetente (From) das notificacoes, verificado no SES (us-east-1). Na sandbox
+      do SES, o destinatario tambem precisa ser verificado. Verificar com:
+      aws ses verify-email-identity --email-address <endereco> --profile hackaton --region us-east-1
+  ModeloBedrock:
+    Type: String
+    Default: anthropic.claude-3-5-sonnet-20240620-v1:0
+    Description: >
+      Id do modelo Bedrock usado pelo assistente de reserva (INOV1). Assume-se
+      Anthropic Claude via Messages API; ajuste aqui para trocar de modelo/versao.
+      Habilite o acesso ao modelo no console do Bedrock (us-east-1, profile hackaton)
+      antes do deploy.
+
+Globals:
+  Function:
+    Runtime: java21
+    MemorySize: 512
+    Timeout: 30
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        TABELA_SOLARE: !Ref TabelaSolare
+        AMBIENTE: !Ref Ambiente
+        # Barramento EventBridge para os eventos de dominio de reserva (F8/NF1.2).
+        BARRAMENTO_EVENTOS: !Ref BarramentoSolare
+        # Stub de identidade habilitado apenas fora de producao (NF3.7).
+        STUB_IDENTIDADE_HABILITADO: !If [EhProducao, 'false', 'true']
+
+Conditions:
+  EhProducao: !Equals [!Ref Ambiente, 'prod']
+
+Resources:
+
+  # ---------------------------------------------------------------------------
+  # DynamoDB single-table (design.md: PK/SK + GSI1/GSI2/GSI3 + TTL)
+  # ---------------------------------------------------------------------------
+  TabelaSolare:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'solare-${Ambiente}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+        - AttributeName: GSI2PK
+          AttributeType: S
+        - AttributeName: GSI2SK
+          AttributeType: S
+        - AttributeName: GSI3PK
+          AttributeType: S
+        - AttributeName: GSI3SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        # GSI1: hierarquia de ambientes (PAI#{id} -> filhos)
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        # GSI2: reservas por solicitante (SOLIC#{id})
+        - IndexName: GSI2
+          KeySchema:
+            - AttributeName: GSI2PK
+              KeyType: HASH
+            - AttributeName: GSI2SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        # GSI3: reservas por data (DATA#{yyyy-mm-dd}) - cards do atendente
+        - IndexName: GSI3
+          KeySchema:
+            - AttributeName: GSI3PK
+              KeyType: HASH
+            - AttributeName: GSI3SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: expiraEm
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: projeto
+          Value: solare
+        - Key: ambiente
+          Value: !Ref Ambiente
+
+  # ---------------------------------------------------------------------------
+  # API Gateway HTTP API
+  # ---------------------------------------------------------------------------
+  ApiSolare:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Ambiente
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - X-Dev-User
+          - X-Dev-Role
+          - X-XSRF-TOKEN
+        AllowOrigins:
+          - '*'
+
+  # ---------------------------------------------------------------------------
+  # Lambda de health check -> GET /api/health
+  # ---------------------------------------------------------------------------
+  HealthCheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-health-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.HealthCheckHandler::handleRequest
+      Description: Health check do BFF Solare (GET /api/health).
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TabelaSolare
+        # O BFF publica os eventos de dominio de reserva no barramento Solare
+        # (F8/NF1.2). Menor privilegio (NF3.6): PutEvents apenas neste bus.
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref BarramentoSolare
+      Events:
+        HealthCheck:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/health
+            Method: GET
+
+  # ---------------------------------------------------------------------------
+  # Lambda do Assistente (INOV1) -> POST /api/assistente/sugestoes
+  # Unica funcao autorizada a invocar o Bedrock. IAM minimo (NF3.6): leitura da
+  # tabela (ambientes/reservas para disponibilidade) e bedrock:InvokeModel
+  # restrito ao modelo configurado, na regiao us-east-1 (profile hackaton no deploy).
+  # ---------------------------------------------------------------------------
+  AssistenteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-assistente-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.AssistenteController::handleRequest
+      Description: >
+        Assistente de reserva em linguagem natural (INOV1): interpreta o pedido
+        via Bedrock e sugere ambientes/horarios disponiveis.
+      Environment:
+        Variables:
+          BEDROCK_MODELO: !Ref ModeloBedrock
+      Policies:
+        # Leitura da tabela para montar a disponibilidade (ambientes/reservas).
+        - DynamoDBReadPolicy:
+            TableName: !Ref TabelaSolare
+        # Menor privilegio (NF3.6): apenas esta funcao invoca o modelo, e apenas
+        # o modelo configurado (foundation-model na regiao do stack).
+        - Statement:
+            - Sid: InvocacaoModeloBedrock
+              Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource:
+                - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${ModeloBedrock}'
+      Events:
+        Sugestoes:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/assistente/sugestoes
+            Method: POST
+
+  # ---------------------------------------------------------------------------
+  # Setores (F1) -> /api/manutencao/setores  (CRUD, perfil ADMIN)
+  # IAM minimo (NF3.6): leitura + escrita na tabela (CRUD do cadastro).
+  # ---------------------------------------------------------------------------
+  SetorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-setores-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.SetorController::handleRequest
+      Description: CRUD de Setores (F1) em /api/manutencao/setores (ADMIN).
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TabelaSolare
+      Events:
+        Colecao:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/manutencao/setores
+            Method: ANY
+        Item:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/manutencao/setores/{id}
+            Method: ANY
+
+  # ---------------------------------------------------------------------------
+  # Ambientes (F2) -> /api/manutencao/ambientes  (CRUD + hierarquia, ADMIN)
+  # IAM minimo (NF3.6): CRUD na tabela (le setor, grava ambiente, consulta GSI1).
+  # ---------------------------------------------------------------------------
+  AmbienteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-ambientes-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.AmbienteController::handleRequest
+      Description: CRUD de Ambientes com hierarquia (F2) em /api/manutencao/ambientes (ADMIN).
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TabelaSolare
+      Events:
+        Colecao:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/manutencao/ambientes
+            Method: ANY
+        Item:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/manutencao/ambientes/{proxy+}
+            Method: ANY
+
+  # ---------------------------------------------------------------------------
+  # Recursos (F3) -> /api/manutencao/recursos  (CRUD, perfil ADMIN)
+  # IAM minimo (NF3.6): leitura + escrita na tabela (CRUD do cadastro).
+  # ---------------------------------------------------------------------------
+  RecursoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-recursos-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.RecursoController::handleRequest
+      Description: CRUD de Recursos (F3) em /api/manutencao/recursos (ADMIN).
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TabelaSolare
+      Events:
+        Colecao:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/manutencao/recursos
+            Method: ANY
+        Item:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/manutencao/recursos/{id}
+            Method: ANY
+
+  # ---------------------------------------------------------------------------
+  # Reservas (F4) -> POST /api/reservas  (perfil SOLICITANTE)
+  # Valida conflitos (RN1-RN13), persiste Reserva + UsoRecurso (TransactWriteItems)
+  # e publica ReservaCriada no EventBridge (F8/NF1.2).
+  # IAM minimo (NF3.6): CRUD na tabela + PutEvents apenas no barramento Solare.
+  # ---------------------------------------------------------------------------
+  ReservaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-reservas-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.ReservaController::handleRequest
+      Description: Criacao de reservas (F4) com validacao de conflitos e evento de dominio (F8).
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TabelaSolare
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref BarramentoSolare
+      Events:
+        Criar:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/reservas
+            Method: POST
+
+  # ---------------------------------------------------------------------------
+  # Disponibilidade (F5) -> GET /api/reservas/disponibilidade  (SOLICITANTE)
+  # Calcula a grade de 30 min livre/ocupado. IAM minimo (NF3.6): leitura da tabela.
+  # ---------------------------------------------------------------------------
+  DisponibilidadeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-disponibilidade-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.DisponibilidadeController::handleRequest
+      Description: Grade de disponibilidade de 30 min (F5) em /api/reservas/disponibilidade.
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TabelaSolare
+      Events:
+        Grade:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/reservas/disponibilidade
+            Method: GET
+
+  # ---------------------------------------------------------------------------
+  # Painel do Atendente (F6) -> GET /api/reservas/atendente  (perfil ATENDENTE)
+  # Lista reservas por data (GSI3). IAM minimo (NF3.6): leitura da tabela.
+  # ---------------------------------------------------------------------------
+  AtendenteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-atendente-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.AtendenteController::handleRequest
+      Description: Painel do atendente - cards por data (F6) em /api/reservas/atendente.
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TabelaSolare
+      Events:
+        PorData:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiSolare
+            Path: /api/reservas/atendente
+            Method: GET
+
+  # ---------------------------------------------------------------------------
+  # EventBridge: barramento de eventos de dominio de reserva (F8 / NF1.2)
+  # O BFF publica ReservaCriada/ReservaAlterada aqui; a regra na Lambda de
+  # notificacao (abaixo) consome e dispara o e-mail. Arquitetura orientada a
+  # eventos desacoplando a notificacao do caminho critico da reserva.
+  # ---------------------------------------------------------------------------
+  BarramentoSolare:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub 'solare-eventos-${Ambiente}'
+
+  # Fila morta (DLQ) para eventos que falharem o processamento na Lambda, sem
+  # afetar o caminho critico (reprocessamento/inspecao posterior).
+  NotificacaoDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub 'solare-notificacao-dlq-${Ambiente}'
+      MessageRetentionPeriod: 1209600
+
+  # ---------------------------------------------------------------------------
+  # Lambda de Notificacao -> consome EventBridge e envia e-mail HTML via SES
+  # IAM minimo: le a tabela (resolver e-mail do setor) e envia e-mail pelo SES.
+  # ---------------------------------------------------------------------------
+  NotificacaoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'solare-notificacao-${Ambiente}'
+      CodeUri: ../backend/target/solare-backend.jar
+      Handler: br.mp.mpf.solare.lambda.NotificacaoHandler::handleRequest
+      Description: Consome eventos de reserva (EventBridge) e envia e-mail HTML via SES (F8).
+      Environment:
+        Variables:
+          EMAIL_REMETENTE: !Ref EmailRemetente
+      Policies:
+        # Menor privilegio (NF3.6): apenas leitura da tabela e envio pelo SES.
+        - DynamoDBReadPolicy:
+            TableName: !Ref TabelaSolare
+        - Statement:
+            - Sid: EnvioEmailSes
+              Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
+      Events:
+        ReservaEvento:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref BarramentoSolare
+            Pattern:
+              source:
+                - solare.reservas
+              detail-type:
+                - ReservaCriada
+                - ReservaAlterada
+            DeadLetterConfig:
+              Arn: !GetAtt NotificacaoDlq.Arn
+
+Outputs:
+  ApiEndpoint:
+    Description: URL base do API Gateway HTTP API.
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}'
+  HealthUrl:
+    Description: URL do endpoint de health check.
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/health'
+  AssistenteUrl:
+    Description: URL do endpoint do assistente de reserva (INOV1).
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/assistente/sugestoes'
+  SetoresUrl:
+    Description: URL do cadastro de Setores (F1).
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/manutencao/setores'
+  AmbientesUrl:
+    Description: URL do cadastro de Ambientes (F2).
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/manutencao/ambientes'
+  RecursosUrl:
+    Description: URL do cadastro de Recursos (F3).
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/manutencao/recursos'
+  ReservasUrl:
+    Description: URL de criacao de reservas (F4).
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/reservas'
+  DisponibilidadeUrl:
+    Description: URL da grade de disponibilidade (F5).
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/reservas/disponibilidade'
+  AtendenteUrl:
+    Description: URL do painel do atendente (F6).
+    Value: !Sub 'https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/reservas/atendente'
+  TabelaSolareNome:
+    Description: Nome da tabela DynamoDB single-table.
+    Value: !Ref TabelaSolare
+  BarramentoEventosNome:
+    Description: Nome do barramento EventBridge de eventos de reserva (F8).
+    Value: !Ref BarramentoSolare
+  NotificacaoFunctionNome:
+    Description: Nome da Lambda de notificacao (consumidora dos eventos de reserva).
+    Value: !Ref NotificacaoFunction

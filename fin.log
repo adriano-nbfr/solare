@@ -1,0 +1,10 @@
+A 15:19:44,53  
+B_STACK_LIMPA 15:19:44,53  
+
+Waiting for changeset to be created..
+
+aws: [ERROR]: An error occurred (InvalidChangeSetStatus) when calling the ExecuteChangeSet operation: ChangeSet [arn:aws:cloudformation:us-east-1:811205581925:changeSet/awscli-cloudformation-package-deploy-1791397269/a12f94df-8bef-4d01-aedb-e38ffd5a1554] cannot be executed in its current execution status of [OBSOLETE]
+C_DEPLOY_EXIT=0 15:19:44,53  
+CREATE_IN_PROGRESS
+null
+Z_FIM 15:19:44,53 

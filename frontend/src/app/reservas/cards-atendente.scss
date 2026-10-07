@@ -1,0 +1,98 @@
+:host {
+  display: block;
+}
+
+// Foco sempre visível para operação por teclado (NF2 / eMAG).
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+// Cada grupo de data é uma seção com título próprio (hierarquia h2 → h3).
+.grupo-data {
+  & + .grupo-data {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+  }
+}
+
+// Grade responsiva de cards: colunas fluidas de mobile a desktop.
+.cards-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.card-reserva {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #adb5bd;
+  border-left: 4px solid #005fcc;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #212529;
+
+  &__cabecalho {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__horario {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  // Status textual (não depende só da cor — NF2).
+  &__status {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.75rem;
+    background: #e2e3e5;
+    color: #343a40;
+  }
+
+  &__dados {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.75rem;
+    row-gap: 0.3rem;
+    margin: 0;
+
+    dt {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    dd {
+      margin: 0;
+      word-break: break-word;
+    }
+  }
+}
+
+// Em telas estreitas, os dados empilham rótulo acima do valor.
+@media (max-width: 480px) {
+  .card-reserva__dados {
+    grid-template-columns: 1fr;
+    row-gap: 0.1rem;
+
+    dt {
+      margin-top: 0.35rem;
+    }
+  }
+}

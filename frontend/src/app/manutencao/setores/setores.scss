@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+// Foco sempre visível para operação por teclado (NF2 / eMAG).
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+// Os cabeçalhos de ordenação são botões; mantê-los legíveis e com área clicável.
+th button {
+  font-weight: 600;
+}

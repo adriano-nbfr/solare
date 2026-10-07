@@ -1,0 +1,94 @@
+<section class="container py-4">
+  <h1>Disponibilidade de ambientes</h1>
+  <p class="text-muted">
+    Escolha um ambiente e uma data para ver a grade de horários em intervalos de
+    30 minutos. Clique num horário livre para iniciar uma reserva.
+  </p>
+
+  <!-- Região de status anunciada por leitores de tela (NF2). -->
+  <p class="visually-hidden" role="status" aria-live="polite">{{ mensagem() }}</p>
+
+  @if (erroGeral()) {
+    <div class="alert alert-danger" role="alert">{{ erroGeral() }}</div>
+  }
+
+  <!-- Filtros de consulta -->
+  <form [formGroup]="form" (ngSubmit)="consultar()" novalidate aria-labelledby="tituloFiltros">
+    <h2 id="tituloFiltros" class="visually-hidden">Filtros de disponibilidade</h2>
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-md-6">
+        <label for="campoAmbiente" class="form-label">
+          Ambiente <span aria-hidden="true">*</span>
+        </label>
+        <select id="campoAmbiente" class="form-select" formControlName="ambienteId" required>
+          <option value="">Selecione um ambiente…</option>
+          @for (ambiente of ambientes(); track ambiente.id) {
+            <option [value]="ambiente.id">{{ ambiente.nome }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label for="campoData" class="form-label">
+          Data <span aria-hidden="true">*</span>
+        </label>
+        <input id="campoData" type="date" class="form-control" formControlName="data" required />
+      </div>
+      <div class="col-12 col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary" [disabled]="carregando()">
+          {{ carregando() ? 'Buscando…' : 'Buscar' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Grade de horários -->
+  @if (carregando()) {
+    <p role="status" class="mt-4">Carregando disponibilidade…</p>
+  } @else if (slots().length) {
+    <h2 class="h5 mt-4" id="tituloGrade">
+      Horários de {{ nomeAmbiente(ambienteConsultado()) }} em {{ dataConsultada() }}
+    </h2>
+
+    <!-- Legenda de estados (NF2: não depender só da cor). -->
+    <ul class="legenda" aria-hidden="true">
+      <li><span class="amostra amostra-livre"></span> Livre</li>
+      <li><span class="amostra amostra-ocupado"></span> Ocupado</li>
+    </ul>
+
+    <ul class="grade-slots" aria-labelledby="tituloGrade">
+      @for (slot of slots(); track slot.inicio) {
+        <li>
+          <button
+            type="button"
+            class="slot"
+            [class.slot-livre]="!slot.ocupado"
+            [class.slot-ocupado]="slot.ocupado"
+            [class.slot-selecionado]="estaSelecionado(slot)"
+            [disabled]="slot.ocupado"
+            [attr.aria-pressed]="estaSelecionado(slot)"
+            [attr.aria-label]="rotuloSlot(slot)"
+            (click)="selecionar(slot)">
+            <span class="slot-horario">{{ slot.inicio }}</span>
+            <span class="slot-estado">{{ slot.ocupado ? 'Ocupado' : 'Livre' }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  } @else if (dataConsultada()) {
+    <p class="mt-4">Nenhum horário disponível para esta consulta.</p>
+  }
+
+  <!-- Formulário de reserva composto, aberto ao selecionar um slot livre -->
+  @if (slotSelecionado(); as sel) {
+    <div class="mt-4">
+      <app-formulario-reserva
+        [ambienteId]="ambienteConsultado()"
+        [ambienteNome]="nomeAmbiente(ambienteConsultado())"
+        [data]="dataConsultada()"
+        [inicio]="sel.inicio"
+        [fim]="sel.fim"
+        (criada)="aoCriar($event)"
+        (cancelado)="aoCancelar()" />
+    </div>
+  }
+</section>

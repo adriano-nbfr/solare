@@ -1,0 +1,12 @@
+{
+  "name": "Validate SAM Template",
+  "version": "1.0.0",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["template.yaml"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run sam validate --lint --profile hackaton and fix any errors"
+  }
+}

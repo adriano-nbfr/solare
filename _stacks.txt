@@ -1,0 +1,18 @@
+[
+    {
+        "Nome": "kiro-rdp",
+        "Status": "CREATE_COMPLETE"
+    },
+    {
+        "Nome": "idc-kiro",
+        "Status": "CREATE_COMPLETE"
+    },
+    {
+        "Nome": "vscode-server",
+        "Status": "CREATE_COMPLETE"
+    },
+    {
+        "Nome": "aws-generative-ai-hackathon",
+        "Status": "CREATE_COMPLETE"
+    }
+]

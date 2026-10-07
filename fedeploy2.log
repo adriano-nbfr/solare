@@ -1,0 +1,21 @@
+DEPLOY2 16:28:54,83  
+
+Waiting for changeset to be created..
+Waiting for stack create/update to complete
+Successfully created/updated stack - solare-frontend
+FE2_EXIT=0 16:28:54,83  
+[
+    {
+        "OutputKey": "BucketName",
+        "OutputValue": "solare-frontend-811205581925-desenv"
+    },
+    {
+        "OutputKey": "DistributionId",
+        "OutputValue": "ECPMJX32B1UR1"
+    },
+    {
+        "OutputKey": "SiteUrl",
+        "OutputValue": "https://d397ksb7yu8k1a.cloudfront.net"
+    }
+]
+FIM 16:28:54,83 

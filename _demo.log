@@ -1,0 +1,444 @@
+Aguardando tabela solare-desenv ficar ACTIVE...
+Tabela ACTIVE.
+
+Habilitando TTL (expiraEm)...
+{
+    "TimeToLiveSpecification": {
+        "Enabled": true,
+        "AttributeName": "expiraEm"
+    }
+}
+
+
+Rodando seed.js...
+Solare seed -> tabela "solare-desenv" (regiao us-east-1, profile hackaton)
+Data base das reservas de demo: 2026-10-08
+Total de itens: 17
+{
+    "UnprocessedItems": {}
+}
+  lote 1/1: 17 itens gravados
+
+Concluido: 17 itens gravados em "solare-desenv".
+Cenarios semeados: conflito de horario (Sala 301), hierarquia (3o Andar x salas) e estouro de projetor (2/2 unidades).
+
+
+=== CENARIO HIERARQUIA - filhos do 3o Andar (GSI1 PAI#amb-andar-3) === (itens: 2)
+{
+    "Items": [
+        {
+            "SK": {
+                "S": "META"
+            },
+            "setorId": {
+                "S": "setor-ti"
+            },
+            "tipo": {
+                "S": "Ambiente"
+            },
+            "capacidade": {
+                "N": "12"
+            },
+            "nome": {
+                "S": "Sala de Reuniao 301"
+            },
+            "GSI1PK": {
+                "S": "PAI#amb-andar-3"
+            },
+            "id": {
+                "S": "amb-sala-301"
+            },
+            "PK": {
+                "S": "AMB#amb-sala-301"
+            },
+            "GSI1SK": {
+                "S": "AMB#amb-sala-301"
+            },
+            "ambientePaiId": {
+                "S": "amb-andar-3"
+            }
+        },
+        {
+            "SK": {
+                "S": "META"
+            },
+            "setorId": {
+                "S": "setor-ti"
+            },
+            "tipo": {
+                "S": "Ambiente"
+            },
+            "nome": {
+                "S": "Sala de Reuniao 302"
+            },
+            "id": {
+                "S": "amb-sala-302"
+            },
+            "GSI1PK": {
+                "S": "PAI#amb-andar-3"
+            },
+            "ambientePaiId": {
+                "S": "amb-andar-3"
+            },
+            "PK": {
+                "S": "AMB#amb-sala-302"
+            },
+            "GSI1SK": {
+                "S": "AMB#amb-sala-302"
+            },
+            "capacidade": {
+                "N": "8"
+            }
+        }
+    ],
+    "Count": 2,
+    "ScannedCount": 2,
+    "ConsumedCapacity": null
+}
+
+
+=== RESERVAS da Sala 301 (particao AMB#amb-sala-301) === (itens: 2)
+{
+    "Items": [
+        {
+            "solicitanteNome": {
+                "S": "Ana Souza (ficticia)"
+            },
+            "solicitanteId": {
+                "S": "u-ana"
+            },
+            "status": {
+                "S": "CONFIRMADA"
+            },
+            "finalidade": {
+                "S": "Planejamento de sprint"
+            },
+            "fim": {
+                "S": "2026-10-08T10:00:00"
+            },
+            "GSI3SK": {
+                "S": "RES#2026-10-08T09:00:00#res-301-manha"
+            },
+            "GSI2SK": {
+                "S": "RES#2026-10-08T09:00:00#res-301-manha"
+            },
+            "GSI2PK": {
+                "S": "SOLIC#u-ana"
+            },
+            "tipo": {
+                "S": "Reserva"
+            },
+            "ambienteId": {
+                "S": "amb-sala-301"
+            },
+            "GSI3PK": {
+                "S": "DATA#2026-10-08"
+            },
+            "inicio": {
+                "S": "2026-10-08T09:00:00"
+            },
+            "snp": {
+                "S": "SNP-DEMO-0001"
+            },
+            "PK": {
+                "S": "AMB#amb-sala-301"
+            },
+            "id": {
+                "S": "res-301-manha"
+            },
+            "recursos": {
+                "L": [
+                    {
+                        "M": {
+                            "recursoId": {
+                                "S": "rec-wifi"
+                            },
+                            "quantidade": {
+                                "N": "1"
+                            }
+                        }
+                    }
+                ]
+            },
+            "SK": {
+                "S": "RES#2026-10-08T09:00:00#res-301-manha"
+            }
+        },
+        {
+            "solicitanteNome": {
+                "S": "Carla Dias (ficticia)"
+            },
+            "solicitanteId": {
+                "S": "u-carla"
+            },
+            "status": {
+                "S": "CONFIRMADA"
+            },
+            "finalidade": {
+                "S": "Apresentacao com projetor"
+            },
+            "fim": {
+                "S": "2026-10-08T12:00:00"
+            },
+            "GSI3SK": {
+                "S": "RES#2026-10-08T11:00:00#res-301-proj"
+            },
+            "GSI2SK": {
+                "S": "RES#2026-10-08T11:00:00#res-301-proj"
+            },
+            "GSI2PK": {
+                "S": "SOLIC#u-carla"
+            },
+            "tipo": {
+                "S": "Reserva"
+            },
+            "ambienteId": {
+                "S": "amb-sala-301"
+            },
+            "GSI3PK": {
+                "S": "DATA#2026-10-08"
+            },
+            "inicio": {
+                "S": "2026-10-08T11:00:00"
+            },
+            "snp": {
+                "S": "SNP-DEMO-0003"
+            },
+            "PK": {
+                "S": "AMB#amb-sala-301"
+            },
+            "id": {
+                "S": "res-301-proj"
+            },
+            "recursos": {
+                "L": [
+                    {
+                        "M": {
+                            "recursoId": {
+                                "S": "rec-projetor"
+                            },
+                            "quantidade": {
+                                "N": "1"
+                            }
+                        }
+                    }
+                ]
+            },
+            "SK": {
+                "S": "RES#2026-10-08T11:00:00#res-301-proj"
+            }
+        }
+    ],
+    "Count": 2,
+    "ScannedCount": 2,
+    "ConsumedCapacity": null
+}
+
+
+=== CENARIO ESTOURO - usos do Projetor (REC#rec-projetor, 2 unidades no total) === (itens: 2)
+{
+    "Items": [
+        {
+            "tipo": {
+                "S": "UsoRecurso"
+            },
+            "ambienteId": {
+                "S": "amb-sala-301"
+            },
+            "inicio": {
+                "S": "2026-10-08T11:00:00"
+            },
+            "recursoId": {
+                "S": "rec-projetor"
+            },
+            "fim": {
+                "S": "2026-10-08T12:00:00"
+            },
+            "quantidade": {
+                "N": "1"
+            },
+            "PK": {
+                "S": "REC#rec-projetor"
+            },
+            "reservaId": {
+                "S": "res-301-proj"
+            },
+            "SK": {
+                "S": "USO#2026-10-08T11:00:00#res-301-proj"
+            }
+        },
+        {
+            "tipo": {
+                "S": "UsoRecurso"
+            },
+            "ambienteId": {
+                "S": "amb-sala-302"
+            },
+            "inicio": {
+                "S": "2026-10-08T11:00:00"
+            },
+            "recursoId": {
+                "S": "rec-projetor"
+            },
+            "fim": {
+                "S": "2026-10-08T12:00:00"
+            },
+            "quantidade": {
+                "N": "1"
+            },
+            "PK": {
+                "S": "REC#rec-projetor"
+            },
+            "reservaId": {
+                "S": "res-302-proj"
+            },
+            "SK": {
+                "S": "USO#2026-10-08T11:00:00#res-302-proj"
+            }
+        }
+    ],
+    "Count": 2,
+    "ScannedCount": 2,
+    "ConsumedCapacity": null
+}
+
+
+=== RESERVAS da Ana (GSI2 SOLIC#u-ana) === (itens: 2)
+{
+    "Items": [
+        {
+            "solicitanteNome": {
+                "S": "Ana Souza (ficticia)"
+            },
+            "solicitanteId": {
+                "S": "u-ana"
+            },
+            "GSI3PK": {
+                "S": "DATA#2026-10-08"
+            },
+            "finalidade": {
+                "S": "Planejamento de sprint"
+            },
+            "recursos": {
+                "L": [
+                    {
+                        "M": {
+                            "recursoId": {
+                                "S": "rec-wifi"
+                            },
+                            "quantidade": {
+                                "N": "1"
+                            }
+                        }
+                    }
+                ]
+            },
+            "ambienteId": {
+                "S": "amb-sala-301"
+            },
+            "snp": {
+                "S": "SNP-DEMO-0001"
+            },
+            "status": {
+                "S": "CONFIRMADA"
+            },
+            "fim": {
+                "S": "2026-10-08T10:00:00"
+            },
+            "inicio": {
+                "S": "2026-10-08T09:00:00"
+            },
+            "id": {
+                "S": "res-301-manha"
+            },
+            "SK": {
+                "S": "RES#2026-10-08T09:00:00#res-301-manha"
+            },
+            "GSI2PK": {
+                "S": "SOLIC#u-ana"
+            },
+            "GSI3SK": {
+                "S": "RES#2026-10-08T09:00:00#res-301-manha"
+            },
+            "GSI2SK": {
+                "S": "RES#2026-10-08T09:00:00#res-301-manha"
+            },
+            "tipo": {
+                "S": "Reserva"
+            },
+            "PK": {
+                "S": "AMB#amb-sala-301"
+            }
+        },
+        {
+            "solicitanteNome": {
+                "S": "Ana Souza (ficticia)"
+            },
+            "solicitanteId": {
+                "S": "u-ana"
+            },
+            "GSI3PK": {
+                "S": "DATA#2026-10-08"
+            },
+            "SK": {
+                "S": "RES#2026-10-08T11:00:00#res-302-proj"
+            },
+            "id": {
+                "S": "res-302-proj"
+            },
+            "status": {
+                "S": "CONFIRMADA"
+            },
+            "PK": {
+                "S": "AMB#amb-sala-302"
+            },
+            "finalidade": {
+                "S": "Demonstracao de produto"
+            },
+            "inicio": {
+                "S": "2026-10-08T11:00:00"
+            },
+            "GSI3SK": {
+                "S": "RES#2026-10-08T11:00:00#res-302-proj"
+            },
+            "GSI2SK": {
+                "S": "RES#2026-10-08T11:00:00#res-302-proj"
+            },
+            "GSI2PK": {
+                "S": "SOLIC#u-ana"
+            },
+            "ambienteId": {
+                "S": "amb-sala-302"
+            },
+            "snp": {
+                "S": "SNP-DEMO-0004"
+            },
+            "fim": {
+                "S": "2026-10-08T12:00:00"
+            },
+            "tipo": {
+                "S": "Reserva"
+            },
+            "recursos": {
+                "L": [
+                    {
+                        "M": {
+                            "recursoId": {
+                                "S": "rec-projetor"
+                            },
+                            "quantidade": {
+                                "N": "1"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "Count": 2,
+    "ScannedCount": 2,
+    "ConsumedCapacity": null
+}
+
+
+==== DEMO CONCLUIDA ====

@@ -1,0 +1,1 @@
+c:\Users\usuario\solare\frontend\dist\browser\index.html

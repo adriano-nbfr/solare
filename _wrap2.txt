@@ -1,0 +1,5 @@
+c:\Users\usuario\solare\backend\mvnw
+c:\Users\usuario\solare\backend\mvnw.cmd
+c:\Users\usuario\solare\backend\.mvn\wrapper
+c:\Users\usuario\solare\backend\.mvn\wrapper\maven-wrapper.jar
+c:\Users\usuario\solare\backend\.mvn\wrapper\maven-wrapper.properties

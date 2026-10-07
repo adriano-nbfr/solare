@@ -1,0 +1,34 @@
+:host {
+  display: block;
+}
+
+// Foco sempre visível para operação por teclado (NF2 / eMAG).
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+// Árvore de ambientes: indentação proporcional ao nível (--nivel), com guia
+// visual à esquerda. A estrutura semântica (role=tree/treeitem + aria-level)
+// é a fonte de verdade para a tecnologia assistiva; a indentação é cosmética.
+.lista-arvore {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.no-arvore {
+  padding-left: calc(var(--nivel, 0) * 1.5rem);
+  border-left: 1px solid transparent;
+}
+
+.no-arvore + .no-arvore {
+  border-top: 1px solid #e9ecef;
+}
+
+.indentacao {
+  display: inline-block;
+}

@@ -1,0 +1,12 @@
+Apache Maven 3.10.0 (c43a36b8d67be7e0805a411bc0898af1a51f5472)
+Maven home: C:\Program Files\apache-maven-3.10.0
+Java version: 21.0.12, vendor: Oracle Corporation, runtime: C:\Program Files\Java\jdk-21.0.12
+Default locale: pt_BR, platform encoding: UTF-8, time zone: America/Sao_Paulo
+OS name: "windows 11", version: "10.0", arch: "amd64", family: "windows"
+---SAM--- 
+'sam' n∆o Ç reconhecido como um comando interno
+ou externo, um programa oper†vel ou um arquivo em lotes.
+---JAVA--- 
+java version "21.0.12" 2026-07-21 LTS
+Java(TM) SE Runtime Environment (build 21.0.12+7-LTS-205)
+Java HotSpot(TM) 64-Bit Server VM (build 21.0.12+7-LTS-205, mixed mode, sharing)

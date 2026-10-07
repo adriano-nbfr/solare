@@ -1,0 +1,23 @@
+# Java / Maven
+backend/target/
+**/*.class
+
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+npm-debug.log*
+
+# AWS SAM
+infra/.aws-sam/
+infra/samconfig.toml.bak
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local env / secrets
+.env.local
+*.pem

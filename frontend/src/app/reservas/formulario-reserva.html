@@ -1,0 +1,79 @@
+<section class="form-reserva" aria-labelledby="tituloReserva">
+  <h2 id="tituloReserva" class="h5">Nova reserva</h2>
+  <p class="text-muted mb-3">
+    {{ ambienteNome() || ambienteId() }} · {{ data() }} ·
+    <strong>{{ periodoRotulo() }}</strong>
+  </p>
+
+  <!-- Região de status anunciada por leitores de tela (NF2). -->
+  <p class="visually-hidden" role="status" aria-live="polite">{{ mensagem() }}</p>
+
+  @if (erroGeral()) {
+    <div class="alert alert-danger" role="alert">{{ erroGeral() }}</div>
+  }
+
+  @if (conflitos().length) {
+    <div class="alert alert-warning" role="alert">
+      <p class="mb-1"><strong>Não foi possível reservar este horário:</strong></p>
+      <ul class="mb-0">
+        @for (c of conflitos(); track c.tipo + c.detalhe) {
+          <li>{{ c.detalhe }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+    <div class="mb-3">
+      <label for="campoFinalidade" class="form-label">
+        Finalidade <span aria-hidden="true">*</span>
+      </label>
+      <textarea
+        id="campoFinalidade"
+        class="form-control"
+        formControlName="finalidade"
+        rows="3"
+        maxlength="500"
+        required
+        [attr.aria-invalid]="errosCampo().finalidade ? 'true' : null"
+        [attr.aria-describedby]="errosCampo().finalidade ? 'erroFinalidade' : null"></textarea>
+      @if (errosCampo().finalidade) {
+        <p id="erroFinalidade" class="invalid-feedback d-block" role="alert">
+          {{ errosCampo().finalidade }}
+        </p>
+      }
+    </div>
+
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-sm-8 mb-3">
+        <label for="campoRecurso" class="form-label">Recurso (opcional)</label>
+        <select id="campoRecurso" class="form-select" formControlName="recursoId">
+          <option value="">Nenhum recurso</option>
+          @for (recurso of recursos(); track recurso.id) {
+            <option [value]="recurso.id">{{ recurso.nome }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-12 col-sm-4 mb-3">
+        <label for="campoQuantidade" class="form-label">Quantidade</label>
+        <input
+          id="campoQuantidade"
+          type="number"
+          min="1"
+          step="1"
+          inputmode="numeric"
+          class="form-control"
+          formControlName="quantidade" />
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary" [disabled]="salvando()">
+        {{ salvando() ? 'Reservando…' : 'Confirmar reserva' }}
+      </button>
+      <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</section>

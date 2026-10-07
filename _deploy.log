@@ -1,0 +1,19 @@
+==== DEPLOY SOLARE 07/10/2026 14:57:55,27 ==== 
+[1/4] Garantindo bucket de artefatos... 
+make_bucket: solare-deploy-811205581925-us-east-1
+(bucket mb exit=0 - ok se ja existir) 
+[2/4] cloudformation package... 
+Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  1048576 / 21555066.0  (4.86%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  2097152 / 21555066.0  (9.73%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  3145728 / 21555066.0  (14.59%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  4194304 / 21555066.0  (19.46%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  5242880 / 21555066.0  (24.32%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  6291456 / 21555066.0  (29.19%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  7340032 / 21555066.0  (34.05%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  8388608 / 21555066.0  (38.92%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  9437184 / 21555066.0  (43.78%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  10485760 / 21555066.0  (48.65%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  11534336 / 21555066.0  (53.51%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  12582912 / 21555066.0  (58.38%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  13631488 / 21555066.0  (63.24%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  14680064 / 21555066.0  (68.10%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  15728640 / 21555066.0  (72.97%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  16312186 / 21555066.0  (75.68%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  17360762 / 21555066.0  (80.54%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  18409338 / 21555066.0  (85.41%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  19457914 / 21555066.0  (90.27%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  20506490 / 21555066.0  (95.14%)Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  21555066 / 21555066.0  (100.00%)
+Successfully packaged artifacts and wrote output template to file c:\Users\usuario\solare\infra\_packaged.yaml.
+Execute the following command to deploy the packaged template
+aws cloudformation deploy --template-file c:\Users\usuario\solare\infra\_packaged.yaml --stack-name <YOUR STACK NAME>
+PACKAGE_EXIT=0 
+[3/4] cloudformation deploy... 
+
+Waiting for changeset to be created..
+
+aws: [ERROR]: Failed to create the changeset: Waiter ChangeSetCreateComplete failed: Waiter encountered a terminal failure state: For expression "Status" we matched expected path: "FAILED" Status: FAILED. Reason: The following hook(s)/validation failed: [AWS::EarlyValidation::ResourceExistenceCheck]. To troubleshoot Early Validation errors, use the DescribeEvents API for detailed failure information.
+DEPLOY_EXIT=255 
+[4/4] Outputs da stack... 
+null
+==== FIM ==== 

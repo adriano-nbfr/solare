@@ -1,0 +1,73 @@
+INICIO 15:13:30,31  
+STACK_LIMPA 15:13:30,31  
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DeleteTable operation: Requested resource not found: Table: solare-desenv not found
+TABELA_LIMPA 15:13:30,31  
+
+Waiting for changeset to be created..
+Waiting for stack create/update to complete
+Successfully created/updated stack - solare
+DEPLOY_EXIT=0 15:13:30,31  
+[
+    {
+        "OutputKey": "BarramentoEventosNome",
+        "OutputValue": "solare-eventos-desenv",
+        "Description": "Nome do barramento EventBridge de eventos de reserva (F8)."
+    },
+    {
+        "OutputKey": "AtendenteUrl",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv/api/reservas/atendente",
+        "Description": "URL do painel do atendente (F6)."
+    },
+    {
+        "OutputKey": "HealthUrl",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv/api/health",
+        "Description": "URL do endpoint de health check."
+    },
+    {
+        "OutputKey": "SetoresUrl",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv/api/manutencao/setores",
+        "Description": "URL do cadastro de Setores (F1)."
+    },
+    {
+        "OutputKey": "TabelaSolareNome",
+        "OutputValue": "solare-desenv",
+        "Description": "Nome da tabela DynamoDB single-table."
+    },
+    {
+        "OutputKey": "RecursosUrl",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv/api/manutencao/recursos",
+        "Description": "URL do cadastro de Recursos (F3)."
+    },
+    {
+        "OutputKey": "DisponibilidadeUrl",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv/api/reservas/disponibilidade",
+        "Description": "URL da grade de disponibilidade (F5)."
+    },
+    {
+        "OutputKey": "NotificacaoFunctionNome",
+        "OutputValue": "solare-notificacao-desenv",
+        "Description": "Nome da Lambda de notificacao (consumidora dos eventos de reserva)."
+    },
+    {
+        "OutputKey": "ApiEndpoint",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv",
+        "Description": "URL base do API Gateway HTTP API."
+    },
+    {
+        "OutputKey": "ReservasUrl",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv/api/reservas",
+        "Description": "URL de criacao de reservas (F4)."
+    },
+    {
+        "OutputKey": "AssistenteUrl",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv/api/assistente/sugestoes",
+        "Description": "URL do endpoint do assistente de reserva (INOV1)."
+    },
+    {
+        "OutputKey": "AmbientesUrl",
+        "OutputValue": "https://2q705xcryk.execute-api.us-east-1.amazonaws.com/desenv/api/manutencao/ambientes",
+        "Description": "URL do cadastro de Ambientes (F2)."
+    }
+]
+FIM 15:13:30,31 

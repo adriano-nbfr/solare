@@ -1,0 +1,264 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Fundação do projeto, IaC base e stub de identidade": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384847931
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384873436
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791385938272
+      }
+    ],
+    "2. Módulo de domínio e repositórios base (DynamoDB)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384848448
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791385952055
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791386674873
+      }
+    ],
+    "3. Cadastro de Setores (F1)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384848908
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791386692367
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791387373631
+      }
+    ],
+    "4. Cadastro de Ambientes com hierarquia (F2)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384849276
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791387402759
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791388142477
+      }
+    ],
+    "5. Cadastro de Recursos (F3)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384849631
+      },
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791388149567
+      },
+      {
+        "executionId": "b4669e5f-b9c9-40fe-8beb-7b1a5593239e",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791388211527
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791388297276
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791388643127
+      }
+    ],
+    "6. Motor de validação de conflitos (RN1–RN13) — núcleo puro": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384849958
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791388650021
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791388982951
+      }
+    ],
+    "7. Serviço de disponibilidade (suporte a F5/INOV1)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384850290
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791388995056
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791389301351
+      }
+    ],
+    "8. Criação de reservas end-to-end (F4) com SNP simulado": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384850777
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791389307382
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791389684462
+      }
+    ],
+    "9. Painel do Solicitante — grade de 30 minutos (F5)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384851062
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791389691298
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791390079732
+      }
+    ],
+    "10. Painel do Atendente — cards por data (F6)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384851355
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791390086648
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791390457910
+      }
+    ],
+    "11. Edição de reservas com destaque de alterações (F7)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384854726
+      }
+    ],
+    "12. Notificações orientadas a eventos (F8)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384855444
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791390476174
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791391173601
+      }
+    ],
+    "13. Assistente de reserva em linguagem natural (Bedrock) — INOV1": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384856295
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791391181948
+      },
+      {
+        "executionId": "b822fba1-d3e2-4593-a410-5a8dee4e832a",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791391893605
+      }
+    ],
+    "14. Autenticação real e compatibilidade DSMPF (substitui o stub)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384856850
+      }
+    ],
+    "15. Hardening de segurança e LGPD (Critério 4)": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384859665
+      }
+    ],
+    "16. Integração final, IaC completo e seed de demonstração": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384861516
+      },
+      {
+        "executionId": "cdf9897e-96ea-470f-ba36-a7f98edd60d1",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791392284127
+      },
+      {
+        "executionId": "cdf9897e-96ea-470f-ba36-a7f98edd60d1",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791393113676
+      }
+    ],
+    "17. (Opcional/stretch) Integração SNP real via MCP": [
+      {
+        "executionId": "87160782-c2ee-494b-8c27-9e452f2e2b4b",
+        "chatSessionId": "sess_6a5fff5f-49ff-4273-8bf1-32165bfe8cde",
+        "timestamp": 1791384862848
+      }
+    ]
+  }
+}

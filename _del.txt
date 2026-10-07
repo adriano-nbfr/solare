@@ -1,0 +1,21 @@
+{
+    "TableDescription": {
+        "TableName": "solare-desenv",
+        "TableStatus": "DELETING",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 0,
+            "WriteCapacityUnits": 0
+        },
+        "TableSizeBytes": 0,
+        "ItemCount": 0,
+        "TableArn": "arn:aws:dynamodb:us-east-1:811205581925:table/solare-desenv",
+        "TableId": "f22e8d3f-53da-4c50-81c6-fe9e1dd2fd04",
+        "BillingModeSummary": {
+            "BillingMode": "PAY_PER_REQUEST",
+            "LastUpdateToPayPerRequestDateTime": "2026-10-07T14:17:53.916000-03:00"
+        },
+        "DeletionProtectionEnabled": false
+    }
+}
+DEL_EXIT=0 

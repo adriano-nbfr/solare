@@ -1,0 +1,40 @@
+npm warn deprecated @angular/platform-browser-dynamic@21.2.25: @angular/platform-browser-dynamic is deprecated. Use `@angular/platform-browser` instead.
+npm warn cleanup Failed to remove some directories [
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\usuario\\solare\\frontend\\node_modules\\@angular\\common',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'C:\Users\usuario\solare\frontend\node_modules\@angular\common\locales'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\usuario\\solare\\frontend\\node_modules\\@angular\\common\\locales'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\usuario\\solare\\frontend\\node_modules\\@angular',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'C:\Users\usuario\solare\frontend\node_modules\@angular\common\locales'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\usuario\\solare\\frontend\\node_modules\\@angular\\common\\locales'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\usuario\\solare\\frontend\\node_modules',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'C:\Users\usuario\solare\frontend\node_modules\@angular\common\locales'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\usuario\\solare\\frontend\\node_modules\\@angular\\common\\locales'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]
+npm error code ECONNRESET
+npm error syscall read
+npm error errno -4077
+npm error network read ECONNRESET
+npm error network This is a problem related to network connectivity.
+npm error network In most cases you are behind a proxy or have bad network settings.
+npm error network
+npm error network If you are behind a proxy, please make sure that the 'proxy' config is set properly.  See: 'npm help config'
+npm error A complete log of this run can be found in: C:\Users\usuario\AppData\Local\npm-cache\_logs\2026-10-07T18_31_14_248Z-debug-0.log
+NPM_EXIT=0 

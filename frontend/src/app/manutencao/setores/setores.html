@@ -1,0 +1,149 @@
+<section class="container py-4">
+  <h1>Setores</h1>
+  <p class="text-muted">
+    Cadastro de setores atendentes. Os ambientes são vinculados a um setor e as
+    notificações são direcionadas ao e-mail informado.
+  </p>
+
+  <!-- Região de status anunciada por leitores de tela (NF2). -->
+  <p class="visually-hidden" role="status" aria-live="polite">{{ mensagem() }}</p>
+
+  @if (erroGeral()) {
+    <div class="alert alert-danger" role="alert">{{ erroGeral() }}</div>
+  }
+
+  <!-- Formulário de cadastro/edição -->
+  <form [formGroup]="form" (ngSubmit)="salvar()" novalidate aria-labelledby="tituloForm">
+    <h2 id="tituloForm" class="h5">
+      {{ editandoId() ? 'Editar setor' : 'Novo setor' }}
+    </h2>
+
+    <div class="mb-3">
+      <label for="campoNome" class="form-label">Nome <span aria-hidden="true">*</span></label>
+      <input
+        id="campoNome"
+        type="text"
+        class="form-control"
+        formControlName="nome"
+        autocomplete="off"
+        required
+        [attr.aria-invalid]="errosCampo().nome ? 'true' : null"
+        [attr.aria-describedby]="errosCampo().nome ? 'erroNome' : null" />
+      @if (errosCampo().nome) {
+        <p id="erroNome" class="invalid-feedback d-block" role="alert">{{ errosCampo().nome }}</p>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="campoSigla" class="form-label">Sigla <span aria-hidden="true">*</span></label>
+      <input
+        id="campoSigla"
+        type="text"
+        class="form-control"
+        formControlName="sigla"
+        autocomplete="off"
+        required
+        [attr.aria-invalid]="errosCampo().sigla ? 'true' : null"
+        [attr.aria-describedby]="errosCampo().sigla ? 'erroSigla' : null" />
+      @if (errosCampo().sigla) {
+        <p id="erroSigla" class="invalid-feedback d-block" role="alert">{{ errosCampo().sigla }}</p>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="campoEmail" class="form-label">
+        E-mail de notificação <span aria-hidden="true">*</span>
+      </label>
+      <input
+        id="campoEmail"
+        type="email"
+        class="form-control"
+        formControlName="emailNotificacao"
+        autocomplete="off"
+        inputmode="email"
+        required
+        [attr.aria-invalid]="errosCampo().emailNotificacao ? 'true' : null"
+        [attr.aria-describedby]="errosCampo().emailNotificacao ? 'erroEmail' : null" />
+      @if (errosCampo().emailNotificacao) {
+        <p id="erroEmail" class="invalid-feedback d-block" role="alert">
+          {{ errosCampo().emailNotificacao }}
+        </p>
+      }
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary" [disabled]="salvando()">
+        {{ editandoId() ? 'Salvar alterações' : 'Cadastrar setor' }}
+      </button>
+      @if (editandoId()) {
+        <button type="button" class="btn btn-outline-secondary" (click)="cancelarEdicao()">
+          Cancelar
+        </button>
+      }
+    </div>
+  </form>
+
+  <!-- Listagem -->
+  <h2 class="h5 mt-4">Setores cadastrados</h2>
+
+  @if (carregando()) {
+    <p role="status">Carregando setores…</p>
+  } @else if (setores().length === 0) {
+    <p>Nenhum setor cadastrado.</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-striped align-middle" aria-label="Lista de setores cadastrados">
+        <thead>
+          <tr>
+            <th scope="col" [attr.aria-sort]="ariaSort('nome')">
+              <button type="button" class="btn btn-link p-0 text-decoration-none" (click)="ordenar('nome')">
+                Nome
+                <span aria-hidden="true">{{ ariaSort('nome') === 'ascending' ? '▲' : ariaSort('nome') === 'descending' ? '▼' : '' }}</span>
+              </button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort('sigla')">
+              <button type="button" class="btn btn-link p-0 text-decoration-none" (click)="ordenar('sigla')">
+                Sigla
+                <span aria-hidden="true">{{ ariaSort('sigla') === 'ascending' ? '▲' : ariaSort('sigla') === 'descending' ? '▼' : '' }}</span>
+              </button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort('email')">
+              <button type="button" class="btn btn-link p-0 text-decoration-none" (click)="ordenar('email')">
+                E-mail de notificação
+                <span aria-hidden="true">{{ ariaSort('email') === 'ascending' ? '▲' : ariaSort('email') === 'descending' ? '▼' : '' }}</span>
+              </button>
+            </th>
+            <th scope="col">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (setor of setores(); track setor.id) {
+            <tr>
+              <td>{{ setor.nome }}</td>
+              <td>{{ setor.sigla }}</td>
+              <td>{{ setor.emailNotificacao }}</td>
+              <td>
+                <div class="d-flex gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="editar(setor)"
+                    [attr.aria-label]="'Editar setor ' + setor.nome">
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="excluir(setor)"
+                    [attr.aria-label]="'Excluir setor ' + setor.nome">
+                    Excluir
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

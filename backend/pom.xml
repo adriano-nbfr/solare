@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>br.mp.mpf</groupId>
+  <artifactId>solare-backend</artifactId>
+  <version>1.0.0-desenv</version>
+  <name>Solare BFF</name>
+  <description>Backend for Frontend (BFF) serverless do Solare — Java 21 em AWS Lambda.</description>
+  <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+    <aws.sdk.version>2.31.6</aws.sdk.version>
+    <aws.lambda.java.core.version>1.2.3</aws.lambda.java.core.version>
+    <aws.lambda.java.events.version>3.14.0</aws.lambda.java.events.version>
+    <jackson.version>2.18.2</jackson.version>
+    <junit.version>5.11.4</junit.version>
+    <mockito.version>5.14.2</mockito.version>
+    <dynamodblocal.version>1.25.1</dynamodblocal.version>
+  </properties>
+
+  <!--
+    Repositorio oficial do AWS DynamoDB Local (nao esta no Maven Central).
+    Usado apenas pelos testes de integracao com o banco embarcado em memoria.
+  -->
+  <repositories>
+    <repository>
+      <id>dynamodb-local</id>
+      <name>AWS DynamoDB Local Release Repository</name>
+      <url>https://s3.us-west-2.amazonaws.com/dynamodb-local/release</url>
+    </repository>
+  </repositories>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${aws.sdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- AWS Lambda runtime -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-core</artifactId>
+      <version>${aws.lambda.java.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-events</artifactId>
+      <version>${aws.lambda.java.events.version}</version>
+    </dependency>
+
+    <!-- AWS SDK v2 — DynamoDB -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>dynamodb</artifactId>
+    </dependency>
+    <!-- Suporte a profile named `hackaton` (NF: profile obrigatorio) -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>auth</artifactId>
+    </dependency>
+
+    <!-- AWS SDK v2 — EventBridge (publicacao de eventos de dominio, F8/NF1.2) -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>eventbridge</artifactId>
+    </dependency>
+    <!-- AWS SDK v2 — SES (envio de e-mail HTML das notificacoes, F8.3/F8.4) -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>ses</artifactId>
+    </dependency>
+    <!--
+      AWS SDK v2 — Bedrock Runtime (assistente de reserva em linguagem natural,
+      INOV1). Apenas a Lambda do assistente invoca o Bedrock (bedrock:InvokeModel),
+      com o profile `hackaton` e a regiao us-east-1 (ver ConfiguracaoAws).
+    -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>bedrockruntime</artifactId>
+    </dependency>
+
+    <!-- JSON -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <!-- Suporte a java.time (ISO-8601) na (de)serializacao dos eventos de dominio -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+    <!-- Testes -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- DynamoDB Local (in-memory) para testes de integracao dos repositorios -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>DynamoDBLocal</artifactId>
+      <version>${dynamodblocal.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>solare-backend</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <!--
+            DynamoDB Local usa sqlite4java, cujas bibliotecas nativas sao
+            copiadas para target/native-libs pela execucao copy-native-libs.
+          -->
+          <systemPropertyVariables>
+            <sqlite4java.library.path>${project.build.directory}/native-libs</sqlite4java.library.path>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+
+      <!--
+        Copia as bibliotecas nativas (sqlite4java) exigidas pelo DynamoDB Local
+        para target/native-libs antes de rodar os testes.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+            <id>copy-native-libs</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeScope>test</includeScope>
+              <includeTypes>so,dll,dylib</includeTypes>
+              <outputDirectory>${project.build.directory}/native-libs</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Fat jar para o Lambda (CodeUri=../backend aponta para o artefato) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

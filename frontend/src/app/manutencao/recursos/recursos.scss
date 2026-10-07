@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+// Foco sempre visível para operação por teclado (NF2 / eMAG).
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}

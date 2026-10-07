@@ -1,0 +1,2 @@
+
+aws: [ERROR]: An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id solare does not exist

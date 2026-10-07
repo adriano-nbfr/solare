@@ -1,0 +1,186 @@
+<section class="container py-4">
+  <h1>Ambientes</h1>
+  <p class="text-muted">
+    Cadastro de ambientes reserváveis, vinculados a um setor e organizados em
+    hierarquia pai/filho (ex.: andar → sala). A relação é usada na validação de
+    conflitos de reserva.
+  </p>
+
+  <!-- Região de status anunciada por leitores de tela (NF2). -->
+  <p class="visually-hidden" role="status" aria-live="polite">{{ mensagem() }}</p>
+
+  @if (erroGeral()) {
+    <div class="alert alert-danger" role="alert">{{ erroGeral() }}</div>
+  }
+
+  <!-- Formulário de cadastro/edição -->
+  <form [formGroup]="form" (ngSubmit)="salvar()" novalidate aria-labelledby="tituloForm">
+    <h2 id="tituloForm" class="h5">
+      {{ editandoId() ? 'Editar ambiente' : 'Novo ambiente' }}
+    </h2>
+
+    <div class="mb-3">
+      <label for="campoNome" class="form-label">Nome <span aria-hidden="true">*</span></label>
+      <input
+        id="campoNome"
+        type="text"
+        class="form-control"
+        formControlName="nome"
+        autocomplete="off"
+        required
+        [attr.aria-invalid]="errosCampo().nome ? 'true' : null"
+        [attr.aria-describedby]="errosCampo().nome ? 'erroNome' : null" />
+      @if (errosCampo().nome) {
+        <p id="erroNome" class="invalid-feedback d-block" role="alert">{{ errosCampo().nome }}</p>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="campoSetor" class="form-label">Setor <span aria-hidden="true">*</span></label>
+      <select
+        id="campoSetor"
+        class="form-select"
+        formControlName="setorId"
+        required
+        [attr.aria-invalid]="errosCampo().setorId ? 'true' : null"
+        [attr.aria-describedby]="errosCampo().setorId ? 'erroSetor' : null">
+        <option value="">Selecione um setor…</option>
+        @for (setor of setores(); track setor.id) {
+          <option [value]="setor.id">{{ setor.nome }} ({{ setor.sigla }})</option>
+        }
+      </select>
+      @if (errosCampo().setorId) {
+        <p id="erroSetor" class="invalid-feedback d-block" role="alert">{{ errosCampo().setorId }}</p>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="campoPai" class="form-label">Ambiente-pai (opcional)</label>
+      <select
+        id="campoPai"
+        class="form-select"
+        formControlName="ambientePaiId"
+        aria-describedby="ajudaPai"
+        [attr.aria-invalid]="errosCampo().ambientePaiId ? 'true' : null">
+        <option value="">Nenhum (ambiente de topo)</option>
+        @for (pai of opcoesPai(); track pai.id) {
+          <option [value]="pai.id">{{ pai.nome }}</option>
+        }
+      </select>
+      <small id="ajudaPai" class="form-text">
+        Define a hierarquia. Reservar um nível bloqueia o outro no período.
+      </small>
+      @if (errosCampo().ambientePaiId) {
+        <p class="invalid-feedback d-block" role="alert">{{ errosCampo().ambientePaiId }}</p>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="campoCapacidade" class="form-label">
+        Capacidade <span aria-hidden="true">*</span>
+      </label>
+      <input
+        id="campoCapacidade"
+        type="number"
+        min="1"
+        step="1"
+        inputmode="numeric"
+        class="form-control"
+        formControlName="capacidade"
+        required
+        [attr.aria-invalid]="errosCampo().capacidade ? 'true' : null"
+        [attr.aria-describedby]="errosCampo().capacidade ? 'erroCapacidade' : null" />
+      @if (errosCampo().capacidade) {
+        <p id="erroCapacidade" class="invalid-feedback d-block" role="alert">
+          {{ errosCampo().capacidade }}
+        </p>
+      }
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary" [disabled]="salvando()">
+        {{ editandoId() ? 'Salvar alterações' : 'Cadastrar ambiente' }}
+      </button>
+      @if (editandoId()) {
+        <button type="button" class="btn btn-outline-secondary" (click)="cancelarEdicao()">
+          Cancelar
+        </button>
+      }
+    </div>
+  </form>
+
+  <!-- Árvore de ambientes (F2.2) -->
+  <h2 class="h5 mt-4" id="tituloArvore">Hierarquia de ambientes</h2>
+
+  @if (carregando()) {
+    <p role="status">Carregando ambientes…</p>
+  } @else if (ambientes().length === 0) {
+    <p>Nenhum ambiente cadastrado.</p>
+  } @else {
+    <!--
+      Árvore acessível: estrutura em lista com role=tree; cada nó informa seu
+      nível (aria-level) para leitores de tela. A indentação visual acompanha o
+      nível, e as ações seguem operáveis por teclado.
+    -->
+    <ul class="lista-arvore" role="tree" aria-labelledby="tituloArvore">
+      @for (no of arvore(); track no.ambiente.id) {
+        <li
+          role="treeitem"
+          [attr.aria-level]="no.nivel + 1"
+          class="no-arvore"
+          [style.--nivel]="no.nivel">
+          <div class="d-flex align-items-center justify-content-between gap-2 py-1">
+            <span>
+              <span aria-hidden="true" class="indentacao"></span>
+              <strong>{{ no.ambiente.nome }}</strong>
+              <span class="text-muted">
+                · {{ nomeSetor(no.ambiente.setorId) }} · cap. {{ no.ambiente.capacidade }}
+              </span>
+            </span>
+            <span class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                (click)="editar(no.ambiente)"
+                [attr.aria-label]="'Editar ambiente ' + no.ambiente.nome">
+                Editar
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="excluir(no.ambiente)"
+                [attr.aria-label]="'Excluir ambiente ' + no.ambiente.nome">
+                Excluir
+              </button>
+            </span>
+          </div>
+        </li>
+      }
+    </ul>
+
+    <!-- Lista plana equivalente, útil para varredura rápida e indicação do pai (F2.4). -->
+    <h2 class="h6 mt-4">Lista de ambientes</h2>
+    <div class="table-responsive">
+      <table class="table table-striped align-middle" aria-label="Lista de ambientes cadastrados">
+        <thead>
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">Setor</th>
+            <th scope="col">Ambiente-pai</th>
+            <th scope="col">Capacidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ambiente of ambientes(); track ambiente.id) {
+            <tr>
+              <td>{{ ambiente.nome }}</td>
+              <td>{{ nomeSetor(ambiente.setorId) }}</td>
+              <td>{{ nomePai(ambiente.ambientePaiId) }}</td>
+              <td>{{ ambiente.capacidade }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.form-reserva {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  background: #fff;
+}
+
+// Foco sempre visível para operação por teclado (NF2 / eMAG).
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}

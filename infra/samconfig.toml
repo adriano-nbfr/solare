@@ -1,0 +1,22 @@
+# Configuracao padrao do SAM CLI para o Solare.
+# Toda operacao usa o profile `hackaton` e a regiao us-east-1 (regra de workspace).
+version = 0.1
+
+[default.global.parameters]
+stack_name = "solare"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+region = "us-east-1"
+profile = "hackaton"
+confirm_changeset = true
+resolve_s3 = true
+parameter_overrides = "Ambiente=desenv"
+
+[default.sync.parameters]
+region = "us-east-1"
+profile = "hackaton"

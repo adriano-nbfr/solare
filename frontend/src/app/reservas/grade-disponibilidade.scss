@@ -1,0 +1,118 @@
+:host {
+  display: block;
+}
+
+// Foco sempre visível para operação por teclado (NF2 / eMAG).
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+// Legenda dos estados: reforça o significado além da cor (NF2).
+.legenda {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0;
+  margin: 0 0 0.75rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: #343a40;
+    font-size: 0.9rem;
+  }
+
+  .amostra {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.2rem;
+    border: 1px solid currentColor;
+  }
+
+  .amostra-livre {
+    background: #d1e7dd;
+    color: #0f5132;
+  }
+
+  .amostra-ocupado {
+    background: #e2e3e5;
+    color: #41464b;
+  }
+}
+
+// Grade responsiva: colunas fluidas que se adaptam de mobile a desktop.
+.grade-slots {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.5rem;
+}
+
+.slot {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: 0.4rem;
+  border: 1px solid #adb5bd;
+  background: #fff;
+  color: #212529;
+  cursor: pointer;
+  font: inherit;
+
+  .slot-horario {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .slot-estado {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+}
+
+// Livre: verde de alto contraste (texto #0f5132 sobre #d1e7dd) e clicável.
+.slot-livre {
+  background: #d1e7dd;
+  border-color: #0f5132;
+  color: #0f5132;
+}
+
+.slot-livre:hover {
+  background: #badbcc;
+}
+
+// Ocupado: cinza, desabilitado — não depende só da cor (rótulo "Ocupado").
+.slot-ocupado {
+  background: #e2e3e5;
+  border-color: #6c757d;
+  color: #41464b;
+  cursor: not-allowed;
+}
+
+// Selecionado: realce espesso para feedback visual claro do foco de ação.
+.slot-selecionado {
+  outline: 3px solid #005fcc;
+  outline-offset: 1px;
+  border-color: #004a9f;
+  font-weight: 700;
+}
+
+// Em telas estreitas, slots um pouco menores mantêm a varredura confortável.
+@media (max-width: 480px) {
+  .grade-slots {
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  }
+}

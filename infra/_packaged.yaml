@@ -1,0 +1,466 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Solare - MVP Hackathon AWS x MPF. Infra: DynamoDB single-table (PK/SK\
+  \ + GSI1/GSI2/GSI3 + TTL), API Gateway HTTP API + Lambda de health check, barramento\
+  \ EventBridge de eventos de reserva e Lambda de notificacao (consome o evento e\
+  \ envia e-mail HTML via SES - F8). Regiao alvo: us-east-1. Deploy: sam build &&\
+  \ sam deploy --profile hackaton --region us-east-1.\n"
+Parameters:
+  Ambiente:
+    Type: String
+    Default: desenv
+    AllowedValues:
+    - desenv
+    - homolog
+    - prod
+    Description: Ambiente de implantacao. Fora de prod o stub de identidade fica
+      habilitado.
+  EmailRemetente:
+    Type: String
+    Default: nao-responder@solare.mpf.mp.br
+    Description: "Remetente (From) das notificacoes, verificado no SES (us-east-1).\
+      \ Na sandbox do SES, o destinatario tambem precisa ser verificado. Verificar\
+      \ com: aws ses verify-email-identity --email-address <endereco> --profile hackaton\
+      \ --region us-east-1\n"
+  ModeloBedrock:
+    Type: String
+    Default: anthropic.claude-3-5-sonnet-20240620-v1:0
+    Description: "Id do modelo Bedrock usado pelo assistente de reserva (INOV1). Assume-se\
+      \ Anthropic Claude via Messages API; ajuste aqui para trocar de modelo/versao.\
+      \ Habilite o acesso ao modelo no console do Bedrock (us-east-1, profile hackaton)\
+      \ antes do deploy.\n"
+Globals:
+  Function:
+    Runtime: java21
+    MemorySize: 512
+    Timeout: 30
+    Architectures:
+    - x86_64
+    Environment:
+      Variables:
+        TABELA_SOLARE:
+          Ref: TabelaSolare
+        AMBIENTE:
+          Ref: Ambiente
+        BARRAMENTO_EVENTOS:
+          Ref: BarramentoSolare
+        STUB_IDENTIDADE_HABILITADO:
+          Fn::If:
+          - EhProducao
+          - 'false'
+          - 'true'
+Conditions:
+  EhProducao:
+    Fn::Equals:
+    - Ref: Ambiente
+    - prod
+Resources:
+  TabelaSolare:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: solare-${Ambiente}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: PK
+        AttributeType: S
+      - AttributeName: SK
+        AttributeType: S
+      - AttributeName: GSI1PK
+        AttributeType: S
+      - AttributeName: GSI1SK
+        AttributeType: S
+      - AttributeName: GSI2PK
+        AttributeType: S
+      - AttributeName: GSI2SK
+        AttributeType: S
+      - AttributeName: GSI3PK
+        AttributeType: S
+      - AttributeName: GSI3SK
+        AttributeType: S
+      KeySchema:
+      - AttributeName: PK
+        KeyType: HASH
+      - AttributeName: SK
+        KeyType: RANGE
+      GlobalSecondaryIndexes:
+      - IndexName: GSI1
+        KeySchema:
+        - AttributeName: GSI1PK
+          KeyType: HASH
+        - AttributeName: GSI1SK
+          KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+      - IndexName: GSI2
+        KeySchema:
+        - AttributeName: GSI2PK
+          KeyType: HASH
+        - AttributeName: GSI2SK
+          KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+      - IndexName: GSI3
+        KeySchema:
+        - AttributeName: GSI3PK
+          KeyType: HASH
+        - AttributeName: GSI3SK
+          KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: expiraEm
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+      - Key: projeto
+        Value: solare
+      - Key: ambiente
+        Value:
+          Ref: Ambiente
+  ApiSolare:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName:
+        Ref: Ambiente
+      CorsConfiguration:
+        AllowMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+        AllowHeaders:
+        - Content-Type
+        - X-Dev-User
+        - X-Dev-Role
+        - X-XSRF-TOKEN
+        AllowOrigins:
+        - '*'
+  HealthCheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-health-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.HealthCheckHandler::handleRequest
+      Description: Health check do BFF Solare (GET /api/health).
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: TabelaSolare
+      - EventBridgePutEventsPolicy:
+          EventBusName:
+            Ref: BarramentoSolare
+      Events:
+        HealthCheck:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/health
+            Method: GET
+  AssistenteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-assistente-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.AssistenteController::handleRequest
+      Description: "Assistente de reserva em linguagem natural (INOV1): interpreta\
+        \ o pedido via Bedrock e sugere ambientes/horarios disponiveis.\n"
+      Environment:
+        Variables:
+          BEDROCK_MODELO:
+            Ref: ModeloBedrock
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: TabelaSolare
+      - Statement:
+        - Sid: InvocacaoModeloBedrock
+          Effect: Allow
+          Action:
+          - bedrock:InvokeModel
+          Resource:
+          - Fn::Sub: 
+              arn:aws:bedrock:${AWS::Region}::foundation-model/${ModeloBedrock}
+      Events:
+        Sugestoes:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/assistente/sugestoes
+            Method: POST
+  SetorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-setores-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.SetorController::handleRequest
+      Description: CRUD de Setores (F1) em /api/manutencao/setores (ADMIN).
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: TabelaSolare
+      Events:
+        Colecao:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/manutencao/setores
+            Method: ANY
+        Item:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/manutencao/setores/{id}
+            Method: ANY
+  AmbienteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-ambientes-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.AmbienteController::handleRequest
+      Description: CRUD de Ambientes com hierarquia (F2) em 
+        /api/manutencao/ambientes (ADMIN).
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: TabelaSolare
+      Events:
+        Colecao:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/manutencao/ambientes
+            Method: ANY
+        Item:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/manutencao/ambientes/{proxy+}
+            Method: ANY
+  RecursoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-recursos-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.RecursoController::handleRequest
+      Description: CRUD de Recursos (F3) em /api/manutencao/recursos (ADMIN).
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: TabelaSolare
+      Events:
+        Colecao:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/manutencao/recursos
+            Method: ANY
+        Item:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/manutencao/recursos/{id}
+            Method: ANY
+  ReservaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-reservas-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.ReservaController::handleRequest
+      Description: Criacao de reservas (F4) com validacao de conflitos e evento 
+        de dominio (F8).
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: TabelaSolare
+      - EventBridgePutEventsPolicy:
+          EventBusName:
+            Ref: BarramentoSolare
+      Events:
+        Criar:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/reservas
+            Method: POST
+  DisponibilidadeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-disponibilidade-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.DisponibilidadeController::handleRequest
+      Description: Grade de disponibilidade de 30 min (F5) em 
+        /api/reservas/disponibilidade.
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: TabelaSolare
+      Events:
+        Grade:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/reservas/disponibilidade
+            Method: GET
+  AtendenteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-atendente-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.AtendenteController::handleRequest
+      Description: Painel do atendente - cards por data (F6) em 
+        /api/reservas/atendente.
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: TabelaSolare
+      Events:
+        PorData:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: ApiSolare
+            Path: /api/reservas/atendente
+            Method: GET
+  BarramentoSolare:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name:
+        Fn::Sub: solare-eventos-${Ambiente}
+  NotificacaoDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName:
+        Fn::Sub: solare-notificacao-dlq-${Ambiente}
+      MessageRetentionPeriod: 1209600
+  NotificacaoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: solare-notificacao-${Ambiente}
+      CodeUri: 
+        s3://solare-deploy-811205581925-us-east-1/6d9f30a0b5ccb6316e15148b3e895ac4
+      Handler: br.mp.mpf.solare.lambda.NotificacaoHandler::handleRequest
+      Description: Consome eventos de reserva (EventBridge) e envia e-mail HTML 
+        via SES (F8).
+      Environment:
+        Variables:
+          EMAIL_REMETENTE:
+            Ref: EmailRemetente
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: TabelaSolare
+      - Statement:
+        - Sid: EnvioEmailSes
+          Effect: Allow
+          Action:
+          - ses:SendEmail
+          - ses:SendRawEmail
+          Resource: '*'
+      Events:
+        ReservaEvento:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName:
+              Ref: BarramentoSolare
+            Pattern:
+              source:
+              - solare.reservas
+              detail-type:
+              - ReservaCriada
+              - ReservaAlterada
+            DeadLetterConfig:
+              Arn:
+                Fn::GetAtt:
+                - NotificacaoDlq
+                - Arn
+Outputs:
+  ApiEndpoint:
+    Description: URL base do API Gateway HTTP API.
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}
+  HealthUrl:
+    Description: URL do endpoint de health check.
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/health
+  AssistenteUrl:
+    Description: URL do endpoint do assistente de reserva (INOV1).
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/assistente/sugestoes
+  SetoresUrl:
+    Description: URL do cadastro de Setores (F1).
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/manutencao/setores
+  AmbientesUrl:
+    Description: URL do cadastro de Ambientes (F2).
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/manutencao/ambientes
+  RecursosUrl:
+    Description: URL do cadastro de Recursos (F3).
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/manutencao/recursos
+  ReservasUrl:
+    Description: URL de criacao de reservas (F4).
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/reservas
+  DisponibilidadeUrl:
+    Description: URL da grade de disponibilidade (F5).
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/reservas/disponibilidade
+  AtendenteUrl:
+    Description: URL do painel do atendente (F6).
+    Value:
+      Fn::Sub: 
+        https://${ApiSolare}.execute-api.${AWS::Region}.amazonaws.com/${Ambiente}/api/reservas/atendente
+  TabelaSolareNome:
+    Description: Nome da tabela DynamoDB single-table.
+    Value:
+      Ref: TabelaSolare
+  BarramentoEventosNome:
+    Description: Nome do barramento EventBridge de eventos de reserva (F8).
+    Value:
+      Ref: BarramentoSolare
+  NotificacaoFunctionNome:
+    Description: Nome da Lambda de notificacao (consumidora dos eventos de 
+      reserva).
+    Value:
+      Ref: NotificacaoFunction

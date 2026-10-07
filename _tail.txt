@@ -1,0 +1,15 @@
+Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  20506490 / 21555066.0  (95.14%)
+Uploading to 6d9f30a0b5ccb6316e15148b3e895ac4  21555066 / 21555066.0  (100.00%)
+Successfully packaged artifacts and wrote output template to file c:\Users\usuario\solare\infra\_packaged.yaml.
+Execute the following command to deploy the packaged template
+aws cloudformation deploy --template-file c:\Users\usuario\solare\infra\_packaged.yaml --stack-name <YOUR STACK NAME>
+PACKAGE_EXIT=0 
+[3/4] cloudformation deploy... 
+
+Waiting for changeset to be created..
+
+aws: [ERROR]: Failed to create the changeset: Waiter ChangeSetCreateComplete failed: Waiter encountered a terminal failure state: For expression "Status" we matched expected path: "FAILED" Status: FAILED. Reason: The following hook(s)/validation failed: [AWS::EarlyValidation::ResourceExistenceCheck]. To troubleshoot Early Validation errors, use the DescribeEvents API for detailed failure information.
+DEPLOY_EXIT=255 
+[4/4] Outputs da stack... 
+null
+==== FIM ==== 

@@ -1,0 +1,14 @@
+---HEALTH---  
+{"status":"UP","servico":"solare-bff"}  
+---SEED---  
+Solare seed -> tabela "solare-desenv" (regiao us-east-1, profile hackaton)
+Data base das reservas de demo: 2026-10-08
+Total de itens: 17
+{
+    "UnprocessedItems": {}
+}
+  lote 1/1: 17 itens gravados
+
+Concluido: 17 itens gravados em "solare-desenv".
+Cenarios semeados: conflito de horario (Sala 301), hierarquia (3o Andar x salas) e estouro de projetor (2/2 unidades).
+FIM 

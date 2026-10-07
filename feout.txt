@@ -1,0 +1,17 @@
+STATUS:  
+CREATE_COMPLETE
+OUTPUTS:  
+[
+    {
+        "OutputKey": "BucketName",
+        "OutputValue": "solare-frontend-811205581925-desenv"
+    },
+    {
+        "OutputKey": "DistributionId",
+        "OutputValue": "ECPMJX32B1UR1"
+    },
+    {
+        "OutputKey": "SiteUrl",
+        "OutputValue": "https://d397ksb7yu8k1a.cloudfront.net"
+    }
+]

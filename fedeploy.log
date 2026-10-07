@@ -1,0 +1,7 @@
+DEPLOY_FE 16:25:36,02  
+
+aws: [ERROR]: An error occurred (ValidationError) when calling the CreateChangeSet operation: Invalid template property or properties [???AWSTemplateFormatVersion]
+FE_DEPLOY_EXIT=0 16:25:36,02  
+
+aws: [ERROR]: An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id solare-frontend does not exist
+FIM 16:25:36,02 

@@ -1,0 +1,73 @@
+<section class="container py-4">
+  <h1>Painel do Atendente</h1>
+  <p class="text-muted">
+    Acompanhe as reservas do dia agrupadas por data. Escolha uma data para
+    filtrar as solicitações.
+  </p>
+
+  <!-- Região de status anunciada por leitores de tela (NF2). -->
+  <p class="visually-hidden" role="status" aria-live="polite">{{ mensagem() }}</p>
+
+  @if (erroGeral()) {
+    <div class="alert alert-danger" role="alert">{{ erroGeral() }}</div>
+  }
+
+  <!-- Filtro por data (F6.4) -->
+  <form [formGroup]="form" (ngSubmit)="consultar()" novalidate aria-labelledby="tituloFiltro">
+    <h2 id="tituloFiltro" class="visually-hidden">Filtro por data</h2>
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-md-4">
+        <label for="campoData" class="form-label">
+          Data <span aria-hidden="true">*</span>
+        </label>
+        <input id="campoData" type="date" class="form-control" formControlName="data" required />
+      </div>
+      <div class="col-12 col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary" [disabled]="carregando()">
+          {{ carregando() ? 'Buscando…' : 'Buscar' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Cards agrupados por data (F6.1) -->
+  @if (carregando()) {
+    <p role="status" class="mt-4">Carregando reservas…</p>
+  } @else if (total()) {
+    @for (grupo of grupos(); track grupo.data) {
+      <section class="grupo-data mt-4" [attr.aria-label]="'Reservas de ' + (grupo.data || 'data não informada')">
+        <h2 class="h5">{{ grupo.data || 'Data não informada' }}</h2>
+        <ul class="cards-grid">
+          @for (card of grupo.cards; track card.reservaId) {
+            <li>
+              <article class="card-reserva" [attr.aria-label]="rotuloCard(card)">
+                <header class="card-reserva__cabecalho">
+                  <h3 class="card-reserva__horario">{{ faixaHorario(card) || 'Horário não informado' }}</h3>
+                  @if (card.status) {
+                    <span class="card-reserva__status">{{ card.status }}</span>
+                  }
+                </header>
+
+                <dl class="card-reserva__dados">
+                  <dt>Solicitante</dt>
+                  <dd>{{ card.solicitanteNome || 'Não informado' }}</dd>
+
+                  <dt>Finalidade</dt>
+                  <dd>{{ card.finalidade || 'Não informada' }}</dd>
+
+                  <dt>SNP</dt>
+                  <dd>{{ card.snp || 'Pendente' }}</dd>
+
+                  <dt>Ambiente</dt>
+                  <dd>{{ card.ambienteId }}</dd>
+                </dl>
+              </article>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  } @else if (dataConsultada()) {
+    <p class="mt-4">Nenhuma reserva encontrada para {{ dataConsultada() }}.</p>
+  }
+</section>

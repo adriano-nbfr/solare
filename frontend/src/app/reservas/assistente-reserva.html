@@ -1,0 +1,92 @@
+<section class="container py-4">
+  <h1>Assistente de reserva</h1>
+  <p class="text-muted">
+    Descreva em suas palavras o que você precisa — por exemplo,
+    “sala para 10 pessoas amanhã das 14h às 16h com projetor”. O assistente
+    sugere ambientes e horários disponíveis.
+  </p>
+
+  <!-- Região de status anunciada por leitores de tela (NF2). -->
+  <p class="visually-hidden" role="status" aria-live="polite">{{ mensagem() }}</p>
+
+  @if (erroGeral()) {
+    <div class="alert alert-danger" role="alert">{{ erroGeral() }}</div>
+  }
+
+  <!-- Pedido em linguagem natural -->
+  <form [formGroup]="form" (ngSubmit)="consultar()" novalidate aria-labelledby="tituloPedido">
+    <h2 id="tituloPedido" class="visually-hidden">Pedido em linguagem natural</h2>
+    <div class="mb-3">
+      <label for="campoPedido" class="form-label">
+        O que você quer reservar? <span aria-hidden="true">*</span>
+      </label>
+      <textarea
+        id="campoPedido"
+        class="form-control"
+        rows="3"
+        formControlName="pedido"
+        [attr.aria-describedby]="'ajudaPedido'"
+        placeholder="Ex.: sala para 8 pessoas na próxima terça das 9h às 11h"
+        required></textarea>
+      <p id="ajudaPedido" class="form-text">
+        Inclua, se possível, a quantidade de pessoas, a data, o horário e os
+        recursos desejados.
+      </p>
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="consultando()">
+      {{ consultando() ? 'Consultando…' : 'Pedir sugestões' }}
+    </button>
+  </form>
+
+  <!-- Resultado -->
+  @if (consultando()) {
+    <p role="status" class="mt-4">Consultando o assistente…</p>
+  } @else if (fallback()) {
+    <!-- Fallback: orienta o preenchimento manual pela grade (F5). -->
+    <div class="alert alert-warning mt-4" role="alert">
+      {{ mensagem() }}
+      <a routerLink="/reservas/disponibilidade" class="alert-link">
+        Abrir a grade de disponibilidade
+      </a>.
+    </div>
+  } @else if (sugestoes().length) {
+    <h2 class="h5 mt-4" id="tituloSugestoes">Sugestões disponíveis</h2>
+    <ul class="lista-sugestoes" aria-labelledby="tituloSugestoes">
+      @for (sugestao of sugestoes(); track sugestao.ambienteId + sugestao.horaInicio) {
+        <li>
+          <button
+            type="button"
+            class="sugestao"
+            [class.sugestao-selecionada]="estaSelecionada(sugestao)"
+            [attr.aria-pressed]="estaSelecionada(sugestao)"
+            [attr.aria-label]="rotuloSugestao(sugestao)"
+            (click)="selecionar(sugestao)">
+            <span class="sugestao-ambiente">{{ sugestao.ambienteNome ?? sugestao.ambienteId }}</span>
+            @if (sugestao.capacidade != null) {
+              <span class="sugestao-capacidade">até {{ sugestao.capacidade }} pessoas</span>
+            }
+            <span class="sugestao-horario">
+              {{ sugestao.data }} · {{ sugestao.horaInicio }} às {{ sugestao.horaFim }}
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  } @else if (consultou()) {
+    <p class="mt-4">{{ mensagem() || 'Nenhuma sugestão encontrada para o pedido.' }}</p>
+  }
+
+  <!-- Formulário de reserva composto, aberto ao selecionar uma sugestão -->
+  @if (selecao(); as sel) {
+    <div class="mt-4">
+      <app-formulario-reserva
+        [ambienteId]="sel.ambienteId"
+        [ambienteNome]="sel.ambienteNome"
+        [data]="sel.data"
+        [inicio]="sel.inicio"
+        [fim]="sel.fim"
+        (criada)="aoCriar($event)"
+        (cancelado)="aoCancelar()" />
+    </div>
+  }
+</section>

@@ -1,0 +1,10 @@
+[
+    "idc-kiro-KiroSubscriptionCheckerLambda-t4A4zxCFjWDO",
+    "vscode-server-SecretPlaintextLambda-QzeREfdkjWPa",
+    "vscode-server-CheckSSMDocLambda-KOPJnzfrEAsF",
+    "idc-kiro-IDCLambda-B8GJfvCPg951",
+    "vscode-server-CodeEditorHealthCheckLambda-rTrXR8w726b5",
+    "kiro-rdp-SecretPlaintextLambda-sZRxGCRn793t",
+    "vscode-server-RunSSMDocLambda-sg6azkMo1Jsr",
+    "WSConcurrencyCurtailer-DO-NOT-USE"
+]

@@ -1,0 +1,10 @@
+ O volume na unidade C ‚ Windows
+ O N£mero de S‚rie do Volume ‚ B819-72DA
+
+ Pasta de c:\Users\usuario\solare\backend\target
+
+07/10/2026  14:55        21.555.066 solare-backend.jar
+               1 arquivo(s)     21.555.066 bytes
+               0 pasta(s)   170.012.438.528 bytes dispon¡veis
+---CRIAR-BUCKET--- 
+make_bucket: solare-deploy-811205581925-us-east-1

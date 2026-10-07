@@ -1,0 +1,21 @@
+SYNC 16:48:10,78  
+SYNC_EXIT=0 16:48:10,78  
+{
+    "Location": "https://cloudfront.amazonaws.com/2020-05-31/distribution/ECPMJX32B1UR1/invalidation/I181XTPYXQS385RGNTDGBC29KZ",
+    "Invalidation": {
+        "Id": "I181XTPYXQS385RGNTDGBC29KZ",
+        "Status": "InProgress",
+        "CreateTime": "2026-10-07T19:48:24.860000+00:00",
+        "InvalidationBatch": {
+            "Paths": {
+                "Quantity": 1,
+                "Items": [
+                    "/*"
+                ]
+            },
+            "CallerReference": "cli-1791402502-930456"
+        }
+    }
+}
+INVAL_EXIT=0 16:48:10,78  
+FIM 16:48:10,78 
